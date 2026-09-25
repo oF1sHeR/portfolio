@@ -45,6 +45,53 @@ const COMMON_UNIFORMS = [
   'uAspect',
 ] as const;
 
+export interface LoadedTexture {
+  texture: WebGLTexture;
+  /** Ancho partido por alto, para poder encajar la imagen en modo "cover". */
+  aspect: number;
+}
+
+/**
+ * Carga una imagen y la sube como textura. Resuelve a null si la imagen no
+ * existe o no se puede leer, para que quien llame pueda seguir sin ella en
+ * lugar de dejar la cabecera en negro.
+ */
+export function loadTexture(
+  gl: WebGLRenderingContext,
+  url: string,
+  unit = 0,
+): Promise<LoadedTexture | null> {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+
+    image.onload = () => {
+      const texture = gl.createTexture();
+      if (!texture) return resolve(null);
+
+      gl.activeTexture(gl.TEXTURE0 + unit);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      // Premultiplicado desactivado: el shader usa el alfa como mascara de
+      // recorte, y con premultiplicado los bordes traen color contaminado.
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+      // Sin mipmaps y con borde fijado: las dimensiones de una foto casi nunca
+      // son potencia de dos, y WebGL1 no admite mipmaps en ese caso.
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+      resolve({ texture, aspect: image.naturalWidth / Math.max(image.naturalHeight, 1) });
+    };
+
+    image.onerror = () => resolve(null);
+    image.src = url;
+  });
+}
+
 function compile(gl: WebGLRenderingContext, type: number, source: string, label: string) {
   const shader = gl.createShader(type);
   if (!shader) return null;

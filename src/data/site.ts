@@ -3,15 +3,22 @@ export const site = {
   role: 'Desarrollador web',
   url: 'https://rarestesting.es',
   description:
-    'Portfolio de Rares Vasile, desarrollador web. Interfaces rapidas, accesibles y con una capa visual que se recuerda.',
+    'Portfolio de Rares Vasile, desarrollador web full stack. PHP, Laravel y WordPress, con la base de datos y el servidor incluidos.',
+  /**
+   * Retrato de la cabecera. Ahora apunta a un marcador de posicion.
+   *
+   * TODO(rares): sustituir por tu foto. Lo ideal son DOS ficheros en /public:
+   * el retrato recortado sin fondo (PNG con transparencia) y el original. Con
+   * el recorte, el desplazamiento por parallaje separa figura y fondo de
+   * verdad, sin necesidad de estimar profundidad a ojo.
+   */
+  portrait: '/retrato.svg',
   locale: 'es-ES',
-  // TODO(rares): decide que correo quieres publico. No pongo el de trabajo
-  // por defecto: un portfolio personal lo indexa Google para siempre.
-  email: 'hola@rarestesting.es',
+  email: 'raresvsabau@gmail.com',
   socials: [
     { label: 'GitHub', href: 'https://github.com/oF1sHeR' },
     { label: 'LinkedIn', href: '#' }, // TODO(rares): tu URL de LinkedIn
-    { label: 'Email', href: 'mailto:hola@rarestesting.es' },
+    { label: 'Email', href: 'mailto:raresvsabau@gmail.com' },
   ],
 } as const;
 

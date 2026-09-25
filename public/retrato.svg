@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <!--
+    Marcador de posicion del retrato. Existe para que la cabecera funcione y se
+    pueda ajustar antes de tener la foto real: el alfa hace de mascara de
+    figura y la variacion de luminancia alimenta el proxy de profundidad.
+    Sustituir por /retrato.png (recorte con transparencia).
+  -->
+  <defs>
+    <radialGradient id="piel" cx="38%" cy="32%" r="72%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="55%" stop-color="#9aa0aa"/>
+      <stop offset="100%" stop-color="#2a2d34"/>
+    </radialGradient>
+    <radialGradient id="cuerpo" cx="42%" cy="10%" r="90%">
+      <stop offset="0%" stop-color="#c9ced6"/>
+      <stop offset="100%" stop-color="#1c1f25"/>
+    </radialGradient>
+  </defs>
+
+  <path d="M170 1200 C170 940 300 830 450 830 C600 830 730 940 730 1200 Z" fill="url(#cuerpo)"/>
+  <ellipse cx="450" cy="470" rx="196" ry="250" fill="url(#piel)"/>
+  <path d="M254 430 C254 270 340 190 450 190 C560 190 646 270 646 430 C646 330 570 300 450 300 C330 300 254 330 254 430 Z" fill="#14161b"/>
+</svg>

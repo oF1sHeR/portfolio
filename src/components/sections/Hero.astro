@@ -1,32 +1,41 @@
 ---
 import { site, nav } from '../../data/site';
 
-// Datos de la barra superior. Son reales y verificables: la gracia de la
-// estetica de instrumento se pierde en cuanto pones metricas inventadas.
+// Datos reales y verificables. En cuanto uno es inventado, toda la estetica de
+// instrumento deja de sostenerse.
 const readouts = [
+  { key: 'STACK', value: 'PHP · Laravel · WordPress' },
   { key: 'LOC', value: 'España' },
-  { key: 'ROLE', value: 'Full stack' },
   { key: 'STATUS', value: 'Disponible', live: true },
 ];
 ---
 
 <section id="inicio" class="relative min-h-svh w-full overflow-hidden bg-void">
-  <!-- Reticula de fondo, atenuada hacia los bordes. -->
   <div
-    class="grid-lines absolute inset-0 opacity-70 [mask-image:radial-gradient(75%_75%_at_50%_45%,#000_30%,transparent_100%)]"
+    class="grid-lines absolute inset-0 opacity-60 [mask-image:radial-gradient(80%_80%_at_40%_50%,#000_25%,transparent_100%)]"
     aria-hidden="true"
   >
   </div>
 
-  <!-- El canvas va detras del texto y desplazado a la derecha: el nombre manda
-       en la lectura, la forma acompaña. -->
+  <!--
+    mix-blend-mode: screen. El shader escribe negro fuera de la figura, y con
+    screen el negro es neutro: la reticula sigue viendose detras sin tener que
+    pelearse con un contexto WebGL con canal alfa.
+  -->
   <canvas
-    id="hero-dither"
-    class="absolute top-1/2 right-0 h-[min(92vh,60rem)] w-full max-w-[64rem] -translate-y-1/2 opacity-90 md:right-[-6%] lg:w-[62%]"
+    id="hero-portrait"
+    class="absolute inset-y-0 right-0 h-full w-full opacity-70 mix-blend-screen md:w-[58%] md:opacity-100 lg:w-[52%]"
     aria-hidden="true"></canvas>
 
+  <!-- Degradado que funde el retrato con el negro por la izquierda y abajo,
+       para que el texto siempre tenga contraste suficiente. -->
   <div
-    class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-void)_0%,transparent_55%)]"
+    class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-void)_18%,transparent_62%)] md:bg-[linear-gradient(to_right,var(--color-void)_30%,transparent_72%)]"
+    aria-hidden="true"
+  >
+  </div>
+  <div
+    class="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(to_top,var(--color-void),transparent)]"
     aria-hidden="true"
   >
   </div>
@@ -54,8 +63,8 @@ const readouts = [
 
   <div class="relative z-10 flex min-h-[calc(100svh-5rem)] items-center">
     <div class="container-x">
-      <div class="max-w-4xl">
-        <ul class="mb-10 flex flex-wrap items-center gap-x-8 gap-y-3" data-hero="1">
+      <div class="max-w-2xl">
+        <ul class="mb-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-8" data-hero="1">
           {
             readouts.map((item) => (
               <li class="label flex items-center gap-2">
@@ -73,18 +82,19 @@ const readouts = [
         </ul>
 
         <h1
-          class="text-[clamp(3rem,11vw,9rem)] leading-[0.85] font-semibold tracking-[-0.045em] text-balance"
+          class="text-[clamp(2.75rem,8.5vw,7rem)] leading-[0.88] font-semibold tracking-[-0.045em] text-balance"
           data-hero="2"
         >
           {site.name}
         </h1>
 
-        <p class="mt-8 max-w-md text-lg leading-relaxed text-mute text-pretty" data-hero="3">
-          Desarrollador web. Construyo interfaces rápidas y las llevo hasta
-          producción, del shader al despliegue.
+        <p class="mt-7 max-w-xl text-lg leading-relaxed text-mute text-pretty" data-hero="3">
+          Desarrollador web full stack. Levanto webs y tiendas online con PHP,
+          Laravel y WordPress, y me encargo también de lo que casi nadie quiere
+          tocar: la base de datos y el servidor donde acaban corriendo.
         </p>
 
-        <div class="mt-12 flex flex-wrap items-center gap-4" data-hero="4">
+        <div class="mt-11 flex flex-wrap items-center gap-4" data-hero="4">
           <a
             href="#proyectos"
             class="group inline-flex items-center gap-3 border border-signal/40 bg-signal/5 px-6 py-3 text-sm text-signal transition-colors hover:bg-signal/12"
@@ -93,10 +103,10 @@ const readouts = [
             <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
           </a>
           <a
-            href="#contacto"
+            href={`mailto:${site.email}`}
             class="inline-flex items-center gap-3 border border-line px-6 py-3 text-sm text-fg/70 transition-colors hover:border-fg/30 hover:text-fg"
           >
-            Contacto
+            Escríbeme
           </a>
         </div>
       </div>
@@ -106,8 +116,9 @@ const readouts = [
 
 <script>
   import { gsap } from 'gsap';
-  import { mountQuad } from '../../scripts/gl';
-  import fragmentSource from '../canvas/shaders/dither.frag.glsl?raw';
+  import { mountQuad, loadTexture } from '../../scripts/gl';
+  import fragmentSource from '../canvas/shaders/portrait.frag.glsl?raw';
+  import { site } from '../../data/site';
 
   // Entrada escalonada. Los elementos parten con opacidad 0 desde CSS para que
   // no parpadeen antes de que GSAP los coja.
@@ -119,25 +130,40 @@ const readouts = [
     gsap.fromTo(
       intro,
       { opacity: 0, y: 24 },
-      { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.09, delay: 0.15 },
+      { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.09, delay: 0.2 },
     );
   }
 
-  const canvas = document.getElementById('hero-dither');
+  const canvas = document.getElementById('hero-portrait');
 
   if (canvas instanceof HTMLCanvasElement) {
-    // La trama se calcula en pixeles de dispositivo. Con dpr 1 los puntos
-    // quedan del tamaño justo y el raymarching cuesta la mitad: en una trama
-    // de 1 bit, bajar resolucion mejora el resultado en vez de empeorarlo.
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    let imageAspect = 0.75;
 
-    mountQuad(canvas, fragmentSource, {
-      maxDpr: dpr,
-      extraUniforms: ['uDotSize'],
-      revealDuration: 1.6,
-      onFrame: (renderer) => {
-        renderer.gl.uniform1f(renderer.at('uDotSize'), 2.0 * dpr);
+    const renderer = mountQuad(canvas, fragmentSource, {
+      maxDpr: 2,
+      extraUniforms: ['uImage', 'uImageAspect', 'uParallax', 'uFocusY'],
+      revealDuration: 1.8,
+      onFrame: ({ gl, at }) => {
+        gl.uniform1i(at('uImage'), 0);
+        gl.uniform1f(at('uImageAspect'), imageAspect);
+        gl.uniform1f(at('uParallax'), 0.055);
+        // TODO(rares): ajustar al encuadrar tu foto real. 1 = anclado arriba,
+        // que es lo que evita cortar la cabeza en un retrato vertical.
+        gl.uniform1f(at('uFocusY'), 0.88);
       },
     });
+
+    // Si la foto no carga, desmontamos: mejor una cabecera tipografica limpia
+    // que un rectangulo negro tapando la reticula.
+    if (renderer) {
+      loadTexture(renderer.gl, site.portrait, 0).then((loaded) => {
+        if (!loaded) {
+          renderer.destroy();
+          canvas.remove();
+          return;
+        }
+        imageAspect = loaded.aspect;
+      });
+    }
   }
 </script>
