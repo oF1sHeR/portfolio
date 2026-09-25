@@ -1,2 +1,14 @@
-﻿onlyBuiltDependencies:
+allowBuilds:
+  esbuild: set this to true or false
+  onnxruntime-node: set this to true or false
+
+onlyBuiltDependencies:
   - esbuild
+  - sharp
+  - onnxruntime-node
+
+overrides:
+  # @imgly/background-removal-node fija sharp 0.32.6, que no trae binarios
+  # precompilados para Node 22 y peta al cargar. La 0.35 si, y la API que usa
+  # el paquete no ha cambiado entre ambas.
+  sharp: ^0.35.4

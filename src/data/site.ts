@@ -5,14 +5,12 @@ export const site = {
   description:
     'Portfolio de Rares Vasile, desarrollador web full stack. PHP, Laravel y WordPress, con la base de datos y el servidor incluidos.',
   /**
-   * Retrato de la cabecera. Ahora apunta a un marcador de posicion.
+   * Retrato recortado de la cabecera, generado por scripts/prepare-portrait.mjs.
+   * Para rehacerlo con otra foto:
    *
-   * TODO(rares): sustituir por tu foto. Lo ideal son DOS ficheros en /public:
-   * el retrato recortado sin fondo (PNG con transparencia) y el original. Con
-   * el recorte, el desplazamiento por parallaje separa figura y fondo de
-   * verdad, sin necesidad de estimar profundidad a ojo.
+   *   node scripts/prepare-portrait.mjs ruta/a/la/foto.jpg
    */
-  portrait: '/retrato.svg',
+  portrait: '/retrato.webp',
   locale: 'es-ES',
   email: 'raresvsabau@gmail.com',
   socials: [

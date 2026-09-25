@@ -24,8 +24,9 @@ vec2 coverUv(vec2 uv, float canvasAspect, float imageAspect, float focusY) {
     ? vec2(1.0, imageAspect / canvasAspect)
     : vec2(canvasAspect / imageAspect, 1.0);
   // El anclaje vertical decide que parte se conserva al recortar: con un
-  // retrato, centrar suele cortar la coronilla.
-  vec2 anchor = vec2(0.5, mix(1.0, 0.0, focusY));
+  // retrato, centrar corta la cabeza. Aqui el eje es el de UV, con el 1 arriba,
+  // asi que focusY = 1 ancla en la coronilla.
+  vec2 anchor = vec2(0.5, focusY);
   return (uv - anchor) * scale + anchor;
 }
 
@@ -76,7 +77,9 @@ void main() {
   float edge =
     abs(texture2D(uImage, uvImage + vec2(px.x, 0.0)).a - texture2D(uImage, uvImage - vec2(px.x, 0.0)).a) +
     abs(texture2D(uImage, uvImage + vec2(0.0, px.y)).a - texture2D(uImage, uvImage - vec2(0.0, px.y)).a);
-  color += smoothstep(0.15, 0.9, edge) * vec3(0.00, 0.85, 0.55) * 0.75;
+  // Umbral alto y factor bajo: linea fina. Aflojar el umbral o subir el factor
+  // engorda el contorno y deja de parecer una luz para parecer un neon.
+  color += smoothstep(0.35, 0.95, edge) * vec3(0.00, 0.85, 0.55) * 0.42;
 
   // Recorte contra el fondo negro.
   float mask = smoothstep(0.02, 0.5, tex.a);

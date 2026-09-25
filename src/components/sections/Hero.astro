@@ -147,9 +147,9 @@ const readouts = [
         gl.uniform1i(at('uImage'), 0);
         gl.uniform1f(at('uImageAspect'), imageAspect);
         gl.uniform1f(at('uParallax'), 0.055);
-        // TODO(rares): ajustar al encuadrar tu foto real. 1 = anclado arriba,
-        // que es lo que evita cortar la cabeza en un retrato vertical.
-        gl.uniform1f(at('uFocusY'), 0.88);
+        // 1 = anclado en la coronilla. En un retrato vertical metido en un
+        // hueco apaisado hay que recortar por abajo, nunca por arriba.
+        gl.uniform1f(at('uFocusY'), 1.0);
       },
     });
 
