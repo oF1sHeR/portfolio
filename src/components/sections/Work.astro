@@ -1,0 +1,43 @@
+---
+import Section from '../ui/Section.astro';
+import { projects } from '../../data/projects';
+---
+
+<Section id="proyectos" eyebrow="02 — Proyectos" title="Cosas que he construido">
+  <ul class="divide-y divide-white/8 border-y border-white/8">
+    {
+      projects.map((project) => (
+        <li data-reveal class="group relative">
+          <article class="grid gap-4 py-8 md:grid-cols-12 md:items-baseline md:gap-8 md:py-10">
+            <p class="font-mono text-xs text-mute md:col-span-1">{project.year}</p>
+
+            <div class="md:col-span-5">
+              <h3 class="text-xl font-medium tracking-tight transition-colors group-hover:text-accent md:text-2xl">
+                {project.href ? (
+                  <a href={project.href} class="after:absolute after:inset-0" rel="noopener">
+                    {project.title}
+                  </a>
+                ) : (
+                  project.title
+                )}
+              </h3>
+              <p class="mt-1 font-mono text-[0.7rem] tracking-[0.15em] text-mute uppercase">
+                {project.role}
+              </p>
+            </div>
+
+            <p class="text-pretty text-chrome/60 md:col-span-4">{project.summary}</p>
+
+            <ul class="flex flex-wrap gap-2 md:col-span-2 md:justify-end">
+              {project.stack.map((tech) => (
+                <li class="rounded-full border border-white/12 px-2.5 py-1 font-mono text-[0.65rem] text-chrome/60">
+                  {tech}
+                </li>
+              ))}
+            </ul>
+          </article>
+        </li>
+      ))
+    }
+  </ul>
+</Section>

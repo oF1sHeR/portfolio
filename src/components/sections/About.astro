@@ -1,0 +1,41 @@
+---
+import Section from '../ui/Section.astro';
+
+// TODO(rares): reescribe estos parrafos con tu voz. Lo que hay es estructura,
+// no biografia: dice el que, el como y el por que, en ese orden.
+const paragraphs = [
+  'Soy desarrollador web. Me interesa el punto exacto en el que una interfaz deja de ser correcta y empieza a ser memorable, sin que el usuario pague el precio en milisegundos.',
+  'Trabajo de arriba abajo: del shader que pinta el hero al workflow que lo despliega. Prefiero entender el sistema entero antes que dominar una sola capa.',
+];
+
+const facts = [
+  { label: 'Base', value: 'España' },
+  { label: 'Idiomas', value: 'Español · Rumano · Inglés' },
+  { label: 'Disponibilidad', value: 'Abierto a proyectos' },
+];
+---
+
+<Section id="perfil" eyebrow="01 — Perfil" title="Detrás del metal">
+  <div class="grid gap-12 md:grid-cols-12 md:gap-16">
+    <div data-reveal class="space-y-6 md:col-span-7">
+      {
+        paragraphs.map((text) => (
+          <p class="text-lg leading-relaxed text-chrome/70 text-pretty">{text}</p>
+        ))
+      }
+    </div>
+
+    <dl data-reveal class="space-y-6 md:col-span-4 md:col-start-9">
+      {
+        facts.map((fact) => (
+          <div class="border-t border-white/10 pt-4">
+            <dt class="font-mono text-[0.65rem] tracking-[0.2em] text-mute uppercase">
+              {fact.label}
+            </dt>
+            <dd class="mt-1 text-chrome/85">{fact.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</Section>

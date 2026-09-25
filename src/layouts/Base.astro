@@ -1,0 +1,115 @@
+---
+import '../styles/global.css';
+import { site } from '../data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = `${site.name} — ${site.role}`, description = site.description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
+---
+
+<!doctype html>
+<html lang="es" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={canonical} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={site.name} />
+    <meta name="theme-color" content="#04050a" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Marca JS antes del primer pintado: el CSS oculta [data-reveal] solo
+         entonces, asi que sin JS no se pierde nada de contenido. -->
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: site.name,
+        jobTitle: site.role,
+        url: site.url,
+        sameAs: site.socials.filter((s) => s.href.startsWith('http')).map((s) => s.href),
+      })}
+    />
+  </head>
+
+  <body class="bg-void text-chrome antialiased">
+    <a
+      href="#contenido"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-full focus:bg-chrome focus:px-5 focus:py-2 focus:text-void"
+    >
+      Saltar al contenido
+    </a>
+
+    <slot />
+
+    <script>
+      import Lenis from 'lenis';
+      import { gsap } from 'gsap';
+      import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (!prefersReduced) {
+        const lenis = new Lenis({ lerp: 0.085 });
+
+        // ScrollTrigger mide en cada scroll real; con Lenis hay que avisarle a
+        // mano o los triggers se disparan en la posicion equivocada.
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => lenis.raf(time * 1000));
+        gsap.ticker.lagSmoothing(0);
+
+        // Los anclas del nav las mueve Lenis, no el salto nativo.
+        document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((anchor) => {
+          anchor.addEventListener('click', (event) => {
+            const id = anchor.getAttribute('href');
+            if (!id || id === '#') return;
+            const target = document.querySelector(id);
+            if (!target) return;
+            event.preventDefault();
+            lenis.scrollTo(target as HTMLElement, { offset: 0, duration: 1.2 });
+          });
+        });
+      }
+
+      // Revelado de secciones. En reduced-motion no animamos: solo mostramos.
+      document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((element) => {
+        if (prefersReduced) {
+          gsap.set(element, { opacity: 1, y: 0 });
+          return;
+        }
+        gsap.fromTo(
+          element,
+          { opacity: 0, y: 28 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: 'expo.out',
+            scrollTrigger: { trigger: element, start: 'top 85%', once: true },
+          },
+        );
+      });
+    </script>
+  </body>
+</html>

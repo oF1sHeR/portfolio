@@ -1,0 +1,93 @@
+---
+import { site, nav } from '../../data/site';
+---
+
+<section id="inicio" class="relative h-svh w-full overflow-hidden">
+  <!--
+    Degradado de respaldo: se ve mientras el shader compila, y se queda como
+    fondo definitivo si el navegador no tiene WebGL.
+  -->
+  <div
+    class="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_10%,#2a3040_0%,#0a0c14_45%,#04050a_100%)]"
+    aria-hidden="true"
+  >
+  </div>
+
+  <canvas id="liquid-chrome" class="absolute inset-0 block h-full w-full" aria-hidden="true"></canvas>
+
+  <!-- El nombre vive dentro del canvas, asi que el h1 real va aqui para los
+       lectores de pantalla y los buscadores. -->
+  <h1 class="sr-only">{site.name} — {site.role}</h1>
+
+  <header class="pointer-events-none absolute inset-x-0 top-0 z-10 p-6 md:p-8">
+    <div class="container-x flex items-center justify-between">
+      <a
+        href="#inicio"
+        class="pointer-events-auto font-mono text-xs tracking-[0.3em] text-chrome/70 transition-colors hover:text-chrome"
+      >
+        RV
+      </a>
+
+      <nav aria-label="Principal" class="pointer-events-auto">
+        <ul class="flex items-center gap-5 font-mono text-[0.7rem] tracking-[0.18em] text-chrome/50 md:gap-8">
+          {
+            nav.slice(1).map((item) => (
+              <li>
+                <a href={item.href} class="uppercase transition-colors hover:text-chrome">
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-6 md:p-8">
+    <div class="container-x flex items-end justify-between gap-6">
+      <p class="max-w-xs text-sm leading-relaxed text-chrome/55">
+        Construyo interfaces que van rapidas y se recuerdan. Normalmente ambas cosas a la vez.
+      </p>
+
+      <a
+        href="#perfil"
+        class="pointer-events-auto flex shrink-0 flex-col items-center gap-2 font-mono text-[0.65rem] tracking-[0.25em] text-chrome/50 transition-colors hover:text-chrome"
+      >
+        <span class="uppercase">Scroll</span>
+        <span class="block h-10 w-px animate-[scrollcue_2.2s_ease-in-out_infinite] bg-linear-to-b from-chrome/70 to-transparent"
+        ></span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Fundido al color de la siguiente seccion: evita el corte duro. -->
+  <div
+    class="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-linear-to-b from-transparent to-void"
+    aria-hidden="true"
+  >
+  </div>
+</section>
+
+<script>
+  import { mountLiquidChrome } from '../../scripts/liquid-chrome';
+
+  const canvas = document.getElementById('liquid-chrome');
+  if (canvas instanceof HTMLCanvasElement) mountLiquidChrome(canvas);
+</script>
+
+<style>
+  @keyframes scrollcue {
+    0%,
+    100% {
+      transform: scaleY(0.4);
+      transform-origin: top;
+      opacity: 0.4;
+    }
+    50% {
+      transform: scaleY(1);
+      transform-origin: top;
+      opacity: 1;
+    }
+  }
+</style>

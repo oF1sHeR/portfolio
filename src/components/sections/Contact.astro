@@ -1,0 +1,52 @@
+---
+import { site } from '../../data/site';
+---
+
+<section id="contacto" class="relative border-t border-white/5 py-28 md:py-40">
+  <div class="container-x">
+    <div data-reveal class="max-w-3xl">
+      <p class="mb-6 font-mono text-[0.65rem] tracking-[0.3em] text-accent uppercase">
+        04 — Contacto
+      </p>
+      <h2 class="text-balance text-4xl font-semibold tracking-tight md:text-7xl">
+        ¿Hablamos?
+      </h2>
+      <p class="mt-6 max-w-lg text-pretty text-lg text-chrome/60">
+        Si tienes un proyecto donde el detalle importa, escríbeme. Respondo a todo.
+      </p>
+
+      <a
+        href={`mailto:${site.email}`}
+        class="group mt-10 inline-flex items-center gap-3 rounded-full border border-white/15 px-6 py-3 text-chrome transition-colors hover:border-accent hover:text-accent"
+      >
+        <span class="font-mono text-sm">{site.email}</span>
+        <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="border-t border-white/5 py-8">
+  <div class="container-x flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <p class="font-mono text-[0.7rem] text-mute">
+      &copy; {new Date().getFullYear()} {site.name}
+    </p>
+
+    <ul class="flex gap-6">
+      {
+        site.socials.map((social) => (
+          <li>
+            <a
+              href={social.href}
+              rel="noopener me"
+              target={social.href.startsWith('http') ? '_blank' : undefined}
+              class="font-mono text-[0.7rem] text-mute transition-colors hover:text-chrome"
+            >
+              {social.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</footer>
