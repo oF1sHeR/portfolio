@@ -1,16 +1,21 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
 
 @theme {
-  --color-void: #04050a;
-  --color-ink: #0b0d14;
-  --color-chrome: #e9edf6;
-  --color-mute: #7c869c;
-  --color-accent: #6ee7ff;
-  --color-accent-2: #a78bfa;
+  /* Negro real, no gris oscuro: la trama de 1 bit necesita el contraste
+     maximo o los puntos se emborronan. */
+  --color-void: #000000;
+  --color-ink: #070708;
+  --color-line: #191a1c;
+  --color-fg: #f4f4f5;
+  --color-mute: #6e6e76;
+
+  /* Un unico acento, y con cuentagotas: estados activos y datos vivos. */
+  --color-signal: #00ff9c;
 
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', monospace;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -22,7 +27,7 @@
 
   html {
     background: var(--color-void);
-    color: var(--color-chrome);
+    color: var(--color-fg);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     scrollbar-gutter: stable;
@@ -43,12 +48,12 @@
   }
 
   ::selection {
-    background: var(--color-accent);
+    background: var(--color-signal);
     color: var(--color-void);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-signal);
     outline-offset: 3px;
   }
 
@@ -64,13 +69,35 @@
 
 @utility container-x {
   width: 100%;
-  max-width: 78rem;
+  max-width: 88rem;
   margin-inline: auto;
   padding-inline: 1.5rem;
+}
+
+/* Etiqueta de dato: el tipo de letra que sostiene toda la estetica de
+   instrumento. Mayusculas, monoespaciada y muy espaciada. */
+@utility label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-mute);
+}
+
+/* Retícula de fondo. Se dibuja con gradientes, sin un solo elemento extra. */
+@utility grid-lines {
+  background-image:
+    linear-gradient(to right, var(--color-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-line) 1px, transparent 1px);
+  background-size: 6rem 6rem;
 }
 
 /* Evita el flash de contenido antes de que GSAP tome el control del revelado.
    Solo aplica si hay JS: sin el, todo se ve normal. */
 html.js [data-reveal] {
+  opacity: 0;
+}
+
+html.js [data-hero] {
   opacity: 0;
 }

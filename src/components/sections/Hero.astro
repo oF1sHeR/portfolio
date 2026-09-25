@@ -1,40 +1,48 @@
 ---
 import { site, nav } from '../../data/site';
+
+// Datos de la barra superior. Son reales y verificables: la gracia de la
+// estetica de instrumento se pierde en cuanto pones metricas inventadas.
+const readouts = [
+  { key: 'LOC', value: 'España' },
+  { key: 'ROLE', value: 'Full stack' },
+  { key: 'STATUS', value: 'Disponible', live: true },
+];
 ---
 
-<section id="inicio" class="relative h-svh w-full overflow-hidden">
-  <!--
-    Degradado de respaldo: se ve mientras el shader compila, y se queda como
-    fondo definitivo si el navegador no tiene WebGL.
-  -->
+<section id="inicio" class="relative min-h-svh w-full overflow-hidden bg-void">
+  <!-- Reticula de fondo, atenuada hacia los bordes. -->
   <div
-    class="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_10%,#2a3040_0%,#0a0c14_45%,#04050a_100%)]"
+    class="grid-lines absolute inset-0 opacity-70 [mask-image:radial-gradient(75%_75%_at_50%_45%,#000_30%,transparent_100%)]"
     aria-hidden="true"
   >
   </div>
 
-  <canvas id="liquid-chrome" class="absolute inset-0 block h-full w-full" aria-hidden="true"></canvas>
+  <!-- El canvas va detras del texto y desplazado a la derecha: el nombre manda
+       en la lectura, la forma acompaña. -->
+  <canvas
+    id="hero-dither"
+    class="absolute top-1/2 right-0 h-[min(92vh,60rem)] w-full max-w-[64rem] -translate-y-1/2 opacity-90 md:right-[-6%] lg:w-[62%]"
+    aria-hidden="true"></canvas>
 
-  <!-- El nombre vive dentro del canvas, asi que el h1 real va aqui para los
-       lectores de pantalla y los buscadores. -->
-  <h1 class="sr-only">{site.name} — {site.role}</h1>
+  <div
+    class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-void)_0%,transparent_55%)]"
+    aria-hidden="true"
+  >
+  </div>
 
-  <header class="pointer-events-none absolute inset-x-0 top-0 z-10 p-6 md:p-8">
-    <div class="container-x flex items-center justify-between">
-      <a
-        href="#inicio"
-        class="pointer-events-auto font-mono text-xs tracking-[0.3em] text-chrome/70 transition-colors hover:text-chrome"
-      >
-        RV
-      </a>
+  <header class="relative z-20 pt-6 md:pt-8">
+    <div class="container-x flex items-center justify-between gap-6">
+      <a href="#inicio" class="label text-fg transition-colors hover:text-signal">RV</a>
 
-      <nav aria-label="Principal" class="pointer-events-auto">
-        <ul class="flex items-center gap-5 font-mono text-[0.7rem] tracking-[0.18em] text-chrome/50 md:gap-8">
+      <nav aria-label="Principal">
+        <ul class="flex items-center gap-5 md:gap-8">
           {
-            nav.slice(1).map((item) => (
+            nav.slice(1).map((item, index) => (
               <li>
-                <a href={item.href} class="uppercase transition-colors hover:text-chrome">
-                  {item.label}
+                <a href={item.href} class="label transition-colors hover:text-fg">
+                  <span class="text-signal/50">{String(index + 1).padStart(2, '0')}</span>
+                  <span class="ml-1.5 hidden sm:inline">{item.label}</span>
                 </a>
               </li>
             ))
@@ -44,50 +52,92 @@ import { site, nav } from '../../data/site';
     </div>
   </header>
 
-  <div class="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-6 md:p-8">
-    <div class="container-x flex items-end justify-between gap-6">
-      <p class="max-w-xs text-sm leading-relaxed text-chrome/55">
-        Construyo interfaces que van rapidas y se recuerdan. Normalmente ambas cosas a la vez.
-      </p>
+  <div class="relative z-10 flex min-h-[calc(100svh-5rem)] items-center">
+    <div class="container-x">
+      <div class="max-w-4xl">
+        <ul class="mb-10 flex flex-wrap items-center gap-x-8 gap-y-3" data-hero="1">
+          {
+            readouts.map((item) => (
+              <li class="label flex items-center gap-2">
+                <span class="text-mute/60">{item.key}</span>
+                <span class="text-fg/80">{item.value}</span>
+                {item.live && (
+                  <span class="relative flex h-1.5 w-1.5" aria-hidden="true">
+                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal opacity-70" />
+                    <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-signal" />
+                  </span>
+                )}
+              </li>
+            ))
+          }
+        </ul>
 
-      <a
-        href="#perfil"
-        class="pointer-events-auto flex shrink-0 flex-col items-center gap-2 font-mono text-[0.65rem] tracking-[0.25em] text-chrome/50 transition-colors hover:text-chrome"
-      >
-        <span class="uppercase">Scroll</span>
-        <span class="block h-10 w-px animate-[scrollcue_2.2s_ease-in-out_infinite] bg-linear-to-b from-chrome/70 to-transparent"
-        ></span>
-      </a>
+        <h1
+          class="text-[clamp(3rem,11vw,9rem)] leading-[0.85] font-semibold tracking-[-0.045em] text-balance"
+          data-hero="2"
+        >
+          {site.name}
+        </h1>
+
+        <p class="mt-8 max-w-md text-lg leading-relaxed text-mute text-pretty" data-hero="3">
+          Desarrollador web. Construyo interfaces rápidas y las llevo hasta
+          producción, del shader al despliegue.
+        </p>
+
+        <div class="mt-12 flex flex-wrap items-center gap-4" data-hero="4">
+          <a
+            href="#proyectos"
+            class="group inline-flex items-center gap-3 border border-signal/40 bg-signal/5 px-6 py-3 text-sm text-signal transition-colors hover:bg-signal/12"
+          >
+            Ver proyectos
+            <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">&rarr;</span>
+          </a>
+          <a
+            href="#contacto"
+            class="inline-flex items-center gap-3 border border-line px-6 py-3 text-sm text-fg/70 transition-colors hover:border-fg/30 hover:text-fg"
+          >
+            Contacto
+          </a>
+        </div>
+      </div>
     </div>
-  </div>
-
-  <!-- Fundido al color de la siguiente seccion: evita el corte duro. -->
-  <div
-    class="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-linear-to-b from-transparent to-void"
-    aria-hidden="true"
-  >
   </div>
 </section>
 
 <script>
-  import { mountLiquidChrome } from '../../scripts/liquid-chrome';
+  import { gsap } from 'gsap';
+  import { mountQuad } from '../../scripts/gl';
+  import fragmentSource from '../canvas/shaders/dither.frag.glsl?raw';
 
-  const canvas = document.getElementById('liquid-chrome');
-  if (canvas instanceof HTMLCanvasElement) mountLiquidChrome(canvas);
-</script>
+  // Entrada escalonada. Los elementos parten con opacidad 0 desde CSS para que
+  // no parpadeen antes de que GSAP los coja.
+  const intro = document.querySelectorAll('[data-hero]');
 
-<style>
-  @keyframes scrollcue {
-    0%,
-    100% {
-      transform: scaleY(0.4);
-      transform-origin: top;
-      opacity: 0.4;
-    }
-    50% {
-      transform: scaleY(1);
-      transform-origin: top;
-      opacity: 1;
-    }
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    gsap.set(intro, { opacity: 1, y: 0 });
+  } else {
+    gsap.fromTo(
+      intro,
+      { opacity: 0, y: 24 },
+      { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.09, delay: 0.15 },
+    );
   }
-</style>
+
+  const canvas = document.getElementById('hero-dither');
+
+  if (canvas instanceof HTMLCanvasElement) {
+    // La trama se calcula en pixeles de dispositivo. Con dpr 1 los puntos
+    // quedan del tamaño justo y el raymarching cuesta la mitad: en una trama
+    // de 1 bit, bajar resolucion mejora el resultado en vez de empeorarlo.
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+
+    mountQuad(canvas, fragmentSource, {
+      maxDpr: dpr,
+      extraUniforms: ['uDotSize'],
+      revealDuration: 1.6,
+      onFrame: (renderer) => {
+        renderer.gl.uniform1f(renderer.at('uDotSize'), 2.0 * dpr);
+      },
+    });
+  }
+</script>
