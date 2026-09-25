@@ -1,0 +1,93 @@
+name: Deploy
+
+# Compila en el runner y sube SOLO el resultado por SSH. El servidor nunca
+# necesita Node ni compilar nada, y la clave privada vive en GitHub Secrets.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Desplegar a produccion
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://rarestesting.es
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Sin credenciales configuradas el workflow no falla: se salta el envio.
+      # Asi el repo es utilizable desde el minuto cero.
+      - name: Comprobar credenciales
+        id: guard
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          if [ -z "$SSH_HOST" ] || [ -z "$SSH_USER" ] || [ -z "$SSH_KEY" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Faltan secrets SSH (SSH_HOST, SSH_USER, SSH_PRIVATE_KEY). Se omite el despliegue."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: pnpm/action-setup@v4
+        if: steps.guard.outputs.ready == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.guard.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependencias
+        if: steps.guard.outputs.ready == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Compilar
+        if: steps.guard.outputs.ready == 'true'
+        run: pnpm build
+
+      - name: Preparar clave SSH
+        if: steps.guard.outputs.ready == 'true'
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          # Fijamos la huella del host: sin esto, StrictHostKeyChecking=no
+          # aceptaria cualquier servidor que responda en esa IP.
+          ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Subir con rsync
+        if: steps.guard.outputs.ready == 'true'
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+          REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
+        run: |
+          # --delete deja el docroot identico a dist/. Los --exclude protegen
+          # ficheros que gestiona Plesk y que no vienen del repo.
+          rsync -az --delete \
+            --exclude '.well-known/' \
+            --exclude '.htaccess' \
+            -e "ssh -i ~/.ssh/id_deploy -p $SSH_PORT" \
+            dist/ "$SSH_USER@$SSH_HOST:$REMOTE_PATH"
+
+      - name: Verificar que el sitio responde
+        if: steps.guard.outputs.ready == 'true'
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 5 https://rarestesting.es)
+          echo "HTTP $code"
+          [ "$code" = "200" ]
